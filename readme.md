@@ -7,7 +7,7 @@ This plugin will reload you app's windows whenever their content is compiled. It
 Simply use npm:
 
 ```
-npm install --save-dev webpack-reload-electron
+npm install --save-dev electron-live
 ```
 
 ## Usage
@@ -31,7 +31,21 @@ const electronLive = new ElectronLive({
 
 module.exports = {
 	...
-	plugins: [ reloadElectronPlugin ]
+	plugins: [ electronLive ]
+	...
+}
+```
+
+### Issue 
+
+To make configuration work, add empty object to your configuration for devServer key:
+```
+module.exports = {
+	entry: 'main.js',
+	...
+
+	...
+	devServer: {}
 	...
 }
 ```
