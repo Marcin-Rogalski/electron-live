@@ -1,6 +1,6 @@
 {
   "name": "electron-live",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "lib/main.js",
   "types": "lib/main.d.ts",
@@ -23,7 +23,8 @@
   "scripts": {
     "build:dev": "webpack --mode development",
     "build:prod": "jest && webpack",
-    "test": "jest"
+    "test": "jest",
+    "publish": "npm build:prod && np"
   },
   "keywords": [
     "electron",

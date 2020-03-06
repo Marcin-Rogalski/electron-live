@@ -1,4 +1,11 @@
 const { resolve } = require('path')
+const { DefinePlugin } = require('webpack')
+
+let title = require( resolve( __dirname, 'package.json' ) ).name
+let define = new DefinePlugin({
+	'process.env.TITLE': JSON.stringify( title )
+})
+
 
 module.exports = function( env, args ){
 
@@ -46,6 +53,9 @@ module.exports = function( env, args ){
 		},
 		externals: [
 			'electron', 'tree-kill', 'colors'
+		],
+		plugins: [
+			define
 		]
 	}
 

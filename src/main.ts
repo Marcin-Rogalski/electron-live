@@ -6,11 +6,10 @@ import 'colors'
 import { Options, UserOptions, Compiler, Process } from './types'
 import { isString, isObject } from 'util'
 
-
 export class ElectronLive{
 
 	name: string = 'WebpackElectronPlugin'
-	remote: string = resolve( 'node_modules/webpack-electron-plugin/lib/remote.js' )
+	remote: string = resolve( `node_modules/${ process.env.TITLE }/lib/remote.js` )
 	initialized: boolean = false
 	options: Options = {
 			host: null,
@@ -89,13 +88,17 @@ export class ElectronLive{
 
 					this.userProcesses.push({
 						instance: undefined,
+						pid: undefined,
 						main: target,
-						pid: null,
 						cwd: cwd,
+						locked: false
 					})
 
 				})
 		}
+
+		this.developmentMessage( JSON.stringify( this.options, null, 4 ).magenta )
+		!this.userProcesses || this.displayMessage( JSON.stringify( this.userProcesses.map( process => process.main ), null, 4 ).magenta )
 
 		// set initialization trigger
 		this.initialized = true
@@ -216,10 +219,9 @@ export class ElectronLive{
 
 	start( process: Process ){
 
-		this.developmentMessage( 'Starting process: '.green + process.main.toString().magenta )
+		if( process.locked || process.instance ) return
 
-		if( process.instance && !process.instance.killed ) return
-		if( process.instance === null && !this.options.reopen ) return
+		this.developmentMessage( 'Starting process: '.green + process.main.toString().magenta )
 
 		function printOutput( str: string, err?: boolean ){
 			if( !str ) return
@@ -247,7 +249,7 @@ export class ElectronLive{
 
 		try{
 			// create process instance
-			process.instance = spawn( 
+			let instance = spawn( 
 				electronPath as undefined as string,
 				[ this.options.remote ? this.remote as string : `./${ process.main }` ],
 				{
@@ -265,16 +267,28 @@ export class ElectronLive{
 			)
 
 			// set process pid
-			process.pid = process.instance.pid
+			process.pid = instance.pid
 
-			if( this.options.output === 'normal' ) process.instance.stdout.on('data', data => { printOutput( data ) } )
-			if( this.options.output !== 'none' ) process.instance.stderr.on('data', data => { printOutput( data, true ) } )
+			if( this.options.output === 'normal' ) instance.stdout.on('data', data => { printOutput( data ) } )
+			if( this.options.output !== 'none' ) instance.stderr.on('data', data => { printOutput( data, true ) } )
 
-			process.instance.on('exit', () => { process.instance = null } )
+			instance.on('exit', ( code ) => {
+				
+				instance = undefined
+
+				if( code === 0 && !this.options.reopen ){
+
+					this.displayMessage( '[ locked ] '.magenta + process.main + 'closed manualy. ')
+
+					process.locked = true
+				}
+			} )
+
+			process.instance = instance
 
 		} catch( error ){
-			process.instance = null
 			if( this.options.logging !== 'none' ) {
+				
 				this.displayMessage( error.message, true )
 			}
 		}
@@ -282,14 +296,22 @@ export class ElectronLive{
 
 	stop( process: Process ){
 
+		console.log( 'CLOS'.yellow )
+		console.log( process )
+
+		if( process.locked || !process.instance ) return
+		
 		this.developmentMessage( 'Stopping process: '.red + process.main.toString().magenta )
 
 		try{
+			let instance = process.instance
 
-			( !process.instance || process.instance.killed ) || kill( process.pid || process.instance.pid )
-			process.instance = null
+			kill( process.pid || instance.pid )
 
+			process.instance = undefined
 		} catch( error ){
+
+			process.instance = undefined
 
 			if( this.options.logging !== 'none' ){
 				console.log( 'Failed to close ELECTRON app. Error occured:'.red )
@@ -320,13 +342,13 @@ export class ElectronLive{
 		this.developmentMessage( 'Stopping all processes...' )
 
 		if( this.userProcesses ) this.userProcesses
-			.filter( process => process.instance && !process.instance.killed )
+			// .filter( process => process.instance && !process.instance.killed )
 			.forEach( process => { this.stop( process ) } )
 
 		else this.compilers
 			.filter( compiler => compiler.type === "main" )
 			.map( compiler => compiler.processes )
-			.map( processes => processes.filter( process => process.instance && !process.instance.killed ) )
+			.map( processes => processes )
 			.forEach( processes => processes.forEach( process => { this.stop( process ) } ) )
 	}
 
