@@ -3,4 +3,6 @@
 /test
 tsconfig.json
 webpack.config.js
+publish.js
 *.js.map
+.github
