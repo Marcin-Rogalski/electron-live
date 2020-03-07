@@ -23,7 +23,8 @@
   "scripts": {
     "dev": "webpack --mode development",
     "build": "webpack",
-    "test": "jest"
+    "test": "jest",
+    "publish": "node ./publish.js"
   },
   "keywords": [
     "electron",
