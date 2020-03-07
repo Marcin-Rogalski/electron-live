@@ -1,7 +1,7 @@
 {
   "name": "electron-live",
   "version": "1.1.1",
-  "description": "",
+  "description": "This plugin will reload you app's windows whenever its content is compiled. It will also restart windows whose main files are compiled.",
   "main": "lib/main.js",
   "types": "lib/main.d.ts",
   "devDependencies": {
@@ -21,10 +21,9 @@
     "webpack-dev-server": "^3.10.2"
   },
   "scripts": {
-    "build:dev": "webpack --mode development",
-    "build:prod": "jest && webpack",
-    "test": "jest",
-    "publish-package": "npm run build:prod && npm publish"
+    "dev": "webpack --mode development",
+    "build": "webpack",
+    "test": "jest"
   },
   "keywords": [
     "electron",
@@ -39,7 +38,11 @@
   "repository": {
     "url": "https://github.com/Marcin-Rogalski/electron-live.git"
   },
-  "author": "Marcin Rogalski <marcinrogalski@interia.eu>",
+  "author": {
+    "name": "Marcin Rogalski",
+    "email": "marcinrogalski@interia.eu",
+    "url": "https://github.com/Marcin-Rogalski/"
+  },
   "license": "ISC",
   "jest": {
     "preset": "ts-jest"
