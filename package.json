@@ -1,6 +1,6 @@
 {
   "name": "electron-live",
-  "version": "1.0.1",
+  "version": "1.1.1",
   "description": "",
   "main": "lib/main.js",
   "types": "lib/main.d.ts",
@@ -24,7 +24,7 @@
     "build:dev": "webpack --mode development",
     "build:prod": "jest && webpack",
     "test": "jest",
-    "publish": "npm build:prod && np"
+    "publish-package": "npm run build:prod && npm publish"
   },
   "keywords": [
     "electron",
@@ -47,5 +47,8 @@
   "bundleDependencies": [
     "colors",
     "tree-kill"
+  ],
+  "files": [
+    "readme.md"
   ]
 }
