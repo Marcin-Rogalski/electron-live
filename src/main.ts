@@ -48,9 +48,9 @@ export class ElectronLive{
 	initialize( compiler: Compiler ): void {
 
 		this.developmentMessage( 'Initializing...' )
-		
-		// for ease of use
-		if( !compiler.options.devServer ) compiler.options.devServer = {}
+
+		console.log( 'Initializing compiler`s dev server options:'.yellow )
+		console.log( compiler.options.devServer ? compiler.options.devServer : 'false!'.red )
 
 		// test for HTTPS
 		if( compiler.options.devServer.https ) this.options.https = compiler.options.devServer.https
@@ -123,6 +123,9 @@ export class ElectronLive{
 		if( !this.options.useInProduction && compiler.options.mode === 'production' ) return
 		
 		this.developmentMessage( 'Webpack is applying plugin...' )
+
+		// for ease of use
+		if( !compiler.options.devServer ) compiler.options.devServer = {}
 
 		// add custom properties to comipler
 		compiler = this.wrap( compiler )
