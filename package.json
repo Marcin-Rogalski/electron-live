@@ -1,6 +1,6 @@
 {
   "name": "electron-live",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "This plugin will reload you app's windows whenever its content is compiled. It will also restart windows whose main files are compiled.",
   "main": "lib/main.js",
   "types": "lib/main.d.ts",
