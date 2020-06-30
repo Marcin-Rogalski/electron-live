@@ -4,6 +4,8 @@ let host = process.env.HOST
 let port = process.env.PORT
 let file = process.env.FILE
 
+console.log( process.env.NODE_PATH )
+
 let url = `${ host }:${ port }/${ file }`
 
 try{
@@ -15,7 +17,7 @@ try{
 		response.on('close', () => {
 	
 			try{
-				eval( data )
+				Function(data)();
 			} catch( error ){
 				console.log( 'Failed run remote code.' )
 				console.log( error )

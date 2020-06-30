@@ -1,10 +1,11 @@
-import { resolve } from 'path'
+import { resolve, join } from 'path'
 import { spawn } from 'child_process'
+import { Options, UserOptions, Compiler, Process } from './types'
+import { isString, isObject } from 'util'
+import { readdirSync, existsSync, lstatSync } from 'fs'
 import kill from 'tree-kill'
 import electronPath from 'electron'
 import 'colors'
-import { Options, UserOptions, Compiler, Process } from './types'
-import { isString, isObject } from 'util'
 
 export class ElectronLive{
 
@@ -20,7 +21,8 @@ export class ElectronLive{
 			logging: 'normal',
 			forceRestart: false,
 			reopen: false,
-			useInProduction: true
+			useInProduction: true,
+			args: null
 	}
 	compilers: Array< Compiler > = []
 	userProcesses: Array< Process >
@@ -49,8 +51,8 @@ export class ElectronLive{
 
 		this.developmentMessage( 'Initializing...' )
 
-		console.log( 'Initializing compiler`s dev server options:'.yellow )
-		console.log( compiler.options.devServer ? compiler.options.devServer : 'false!'.red )
+		this.developmentMessage( 'Initializing compiler`s dev server options:'.yellow )
+		this.developmentMessage( compiler.options.devServer ? compiler.options.devServer : 'false!'.red )
 
 		// test for HTTPS
 		if( compiler.options.devServer.https ) this.options.https = compiler.options.devServer.https
@@ -72,7 +74,7 @@ export class ElectronLive{
 
 		// process CONTENT BASE
 		if( this.options.contentBase ) compiler.options.devServer.contentBase = this.options.contentBase
-		else this.options.contentBase = compiler.options.devServer.contentBase
+		else this.options.contentBase = compiler.options.devServer.contentBase || './'
 
 		// process custom MAIN FILES
 		if( this.options.main ){
@@ -251,10 +253,46 @@ export class ElectronLive{
 		}
 
 		try{
+			let nodePath
+			let mainContainingDir: string | string[]
+			
+			mainContainingDir = process.main.split( /(\\|\/)/ )
+			mainContainingDir.pop()
+			mainContainingDir = join( process.cwd, mainContainingDir.join('/') )
+
+			let paths = [
+					mainContainingDir as string,
+					this.options.contentBase
+			]
+
+			this.developmentMessage( 'NODE_PATH lookups:' )
+			this.developmentMessage( paths )
+
+			paths.find( p => {
+				let _path = resolve( p )
+				try{
+					if( 
+						existsSync( _path ) && 
+						lstatSync( _path ).isDirectory() &&
+						readdirSync( _path ).includes( 'package.json' )
+					) {
+						nodePath = join( _path, 'node_modules' ) 
+						this.developmentMessage( 'NODE_PATH: ' + nodePath )
+						return true
+					}
+
+					else return false
+				} 
+				
+				catch( e ) {
+					return false
+				}
+			})
+
 			// create process instance
 			let instance = spawn( 
 				electronPath as undefined as string,
-				[ this.options.remote ? this.remote as string : `./${ process.main }` ],
+				[ this.options.remote ? this.remote as string : `./${ process.main }`,  ...( this.options.args || [] ) ],
 				{
 					cwd: process.cwd,
 					env: this.options.remote
@@ -264,8 +302,11 @@ export class ElectronLive{
 							HOST: this.options.host,
 							FILE: process.main as string,
 							URL: `${ this.options.host }:${ this.options.port }`,
+							NODE_PATH: nodePath
 						} 
-						: {}
+						: {
+							NODE_PATH: nodePath
+						}
 				}
 			)
 

@@ -1,5 +1,5 @@
-import { default as Plugin } from './../src/main'
+import ElectronLive from './../src/main'
 
 test( 'main.ts', () => {
-	
+    
 })

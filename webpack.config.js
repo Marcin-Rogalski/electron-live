@@ -60,14 +60,14 @@ module.exports = function( env, args ){
 	}
 
 	const remote = {
-		target: 'node',
+		target: 'electron-main',
 		mode: mode,
 		devtool: development ? 'source-map' : 'none',
 		entry: './src/remote.ts',
 		output: {
 			filename: 'remote.js',
 			path: resolve( __dirname, 'lib' ),
-			libraryTarget: 'commonjs'
+			libraryTarget: 'commonjs2'
 		},
 		resolve: {
 			extensions: [
@@ -82,7 +82,8 @@ module.exports = function( env, args ){
 						{
 							loader: 'babel-loader',
 							options: {
-								plugins: [ '@babel/plugin-proposal-class-properties' ]
+								plugins: [ '@babel/plugin-proposal-class-properties' ],
+								presets: [ '@babel/preset-env' ]
 							}
 						},
 						{
