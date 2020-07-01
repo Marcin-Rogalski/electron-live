@@ -27,6 +27,7 @@ async function publish() {
 
 			let exitCode
 			let commands = [
+				'git pull origin master',
 				'git add *',
 				`git commit -m "${commitMessage}`,
 				'git push origin master'
