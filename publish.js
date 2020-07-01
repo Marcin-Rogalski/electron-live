@@ -20,23 +20,29 @@ function compare(version_1, version_2) {
 
 async function publish() {
 	let output = await new Promise((resolve, reject) => {
-		let commitMessage
-		let exitCode
-
 		let read = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-		read.question('Enter commit message:', (message) => {
-			commitMessage = message
+		read.question('Enter commit message:\n', (commitMessage) => {
 			read.close()
 
-			try {
-				// publish to git
-				exitCode = execSync(`git add * && git commit -m "${commitMessage}"`, { stdio: "inherit" })
-				if (exitCode !== 0) process.exit(exitCode)
+			let exitCode
+			let commands = [
+				'git add *',
+				`git commit -m "${commitMessage}`,
+				'git publish origin master'
+			]
 
+			try {
+				commands.forEach( cmd => {
+					console.log( cmd )
+					exitCode = execSync(cmd, { stdio: "inherit" })
+				})
 				// exitCode = execSync('npm publish', { stdio: "inherit" })
-				process.exit(exitCode)
-			} catch (e) { console.log(e) }
+				process.exit(0)
+			} catch (e) {
+				console.log(e) 
+				process.exit(1)
+			}
 		});
 
 
