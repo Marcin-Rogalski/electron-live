@@ -27,13 +27,16 @@ async function publish() {
 
 		read.question('Enter commit message:', (message) => {
 			commitMessage = message
+			read.close()
 
-			exitCode = execSync(`git add * && git commit -m "${commitMessage}"`)
-			if (exitCode !== 0) process.exit(exitCode)
-			exitCode = execSync('npm publish')
-			process.exit(exitCode)
+			try {
+				// publish to git
+				exitCode = execSync(`git add * && git commit -m "${commitMessage}"`, { stdio: "inherit" })
+				if (exitCode !== 0) process.exit(exitCode)
 
-			rl.close()
+				// exitCode = execSync('npm publish', { stdio: "inherit" })
+				process.exit(exitCode)
+			} catch (e) { console.log(e) }
 		});
 
 
