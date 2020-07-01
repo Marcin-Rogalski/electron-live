@@ -29,7 +29,7 @@ async function publish() {
 			let commands = [
 				'git add *',
 				`git commit -m "${commitMessage}`,
-				'git publish origin master'
+				'git push origin master'
 			]
 
 			try {
